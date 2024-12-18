@@ -1,8 +1,18 @@
 package simulator
 
+import (
+	"math/big"
+)
+
 // One word has 40 bit
 type Word struct {
 	data []byte
+}
+
+func NewWord() *Word {
+	return &Word{
+		data: make([]byte, 5),
+	}
 }
 
 func (w *Word) DeepCopy() *Word {
@@ -72,10 +82,16 @@ func NewWordFromInt64(v int64) *Word {
 	w.data[0] = byte(absv >> 32 & 0b11111111)
 
 	if v < 0 {
-		return w.Opposite()
+		w.data[0] |= 0b10000000
 	}
 
 	return w
+}
+
+func NewWordFromData(data []byte) *Word {
+	return &Word{
+		data: data,
+	}
 }
 
 func (w *Word) Add(w2 *Word) *Word {
@@ -88,8 +104,55 @@ func (w *Word) Sub(w2 *Word) *Word {
 	return NewWordFromInt64(ans)
 }
 
-func NewWord() *Word {
-	return &Word{
-		data: make([]byte, 5),
+func (w *Word) Mul(w2 *Word) (higherWord, lowerWord *Word) {
+	b1 := big.NewInt(w.ToInt64())
+	b2 := big.NewInt(w2.ToInt64())
+	var b3 big.Int
+	b3.Mul(b1, b2)
+	lower5Bytes := make([]byte, 5)
+	higher5Bytes := make([]byte, 5)
+	bytesAns := b3.Bytes()
+	totalBytes := len(bytesAns)
+	for i := range b3.Bytes() {
+		index := totalBytes - i - 1 // 结果是大端序,从低字节开始倒序遍历
+		if i < 5 {
+			lower5Bytes[4-i] = bytesAns[index]
+		} else if i < 10 {
+			higher5Bytes[9-i] = bytesAns[index]
+		} else {
+			break
+		}
 	}
+
+	higherWord = NewWordFromData(higher5Bytes)
+	lowerWord = NewWordFromData(lower5Bytes)
+	// 设置符号位
+	if b3.Sign() < 0 {
+		higherWord.data[0] |= 0b10000000
+	} else {
+		higherWord.data[0] &= 0b01111111
+	}
+	return
+}
+
+func (w *Word) Div(w2 *Word) (quotient, remainder *Word) {
+	x1 := w.ToInt64()
+	x2 := w2.ToInt64()
+	quotientInt64 := x1 / x2
+	remainderInt64 := x1 % x2
+	quotient = NewWordFromInt64(quotientInt64)
+	remainder = NewWordFromInt64(remainderInt64)
+	return
+}
+
+// Left shift one bit
+func (w *Word) LSH() *Word {
+	x := w.ToInt64() << 1
+	return NewWordFromInt64(x)
+}
+
+// Right shift one bit
+func (w *Word) RSH() *Word {
+	x := w.ToInt64() >> 1
+	return NewWordFromInt64(x)
 }

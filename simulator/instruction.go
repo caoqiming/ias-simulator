@@ -51,9 +51,9 @@ const (
 
 	// Addresss modify
 	// Replace left address field at M(X)[8:19] by 12 rightmost bits of AC
-	OpcodeStoreMLeft = 0b00010010
+	OpcodeStoreMLeftAddr = 0b00010010
 	// Replace right address field at M(X)[28:39] by 12 rightmost bits of AC
-	OpcodeStoreMRight = 0b00010011
+	OpcodeStoreMRightAddr = 0b00010011
 )
 
 var instructionSet InstructionSet
@@ -211,11 +211,54 @@ func (instruction *InstructionSubAbsM) Run() {
 	AC.SetWord(r)
 }
 
-// MUL M(x)
+// MUL M(X)
 type InstructionMultiplyM struct{}
 
 func (instruction *InstructionMultiplyM) Run() {
-	// TODO
+	memory.Read()
+	higherWord, lowerWord := AC.GetWord().Mul(MBR.GetWord())
+	AC.SetWord(higherWord)
+	MQ.SetWord(lowerWord)
+}
+
+// DIV M(X)
+type InstructionDivideM struct{}
+
+func (instruction *InstructionDivideM) Run() {
+	memory.Read()
+	quotient, remainder := AC.GetWord().Div(MBR.GetWord())
+	AC.SetWord(remainder)
+	MQ.SetWord(quotient)
+}
+
+// LSH
+type InstructionLSH struct{}
+
+func (instruction *InstructionLSH) Run() {
+	AC.SetWord(AC.GetWord().LSH())
+}
+
+// RSH
+type InstructionRSH struct{}
+
+func (instruction *InstructionRSH) Run() {
+	AC.SetWord(AC.GetWord().RSH())
+}
+
+// STORE M(X,8:19)
+type InstructionStoreMLeftAddr struct{}
+
+func (instruction *InstructionStoreMLeftAddr) Run() {
+	MBR.SetWord(AC.GetWord())
+	memory.WriteLeftAddr()
+}
+
+// STORE M(X,28:39)
+type InstructionStoreMRightAddr struct{}
+
+func (instruction *InstructionStoreMRightAddr) Run() {
+	MBR.SetWord(AC.GetWord())
+	memory.WriteRightAddr()
 }
 
 // helper function

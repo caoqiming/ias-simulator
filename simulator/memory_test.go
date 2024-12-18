@@ -145,33 +145,92 @@ func TestWordIsNegative(t *testing.T) {
 	}
 }
 
-func TestWordToInt64(t *testing.T) {
+func TestMemoryWriteLeftAddr(t *testing.T) {
 	test := []struct {
-		w       *Word
-		wantInt int64
+		addr int
+		oriW *Word
+		MBR  *Word
+		want *Word
 	}{
 		{
-			w: &Word{
-				data: []byte{0, 0, 0b10111100, 0b01100001, 0b01001110}, // 10111100 01100001 01001110
+			addr: 25,
+			oriW: &Word{
+				data: []byte{0, 0, 0, 0, 0},
 			},
-			wantInt: 12345678,
+			MBR: &Word{
+				data: []byte{0, 0, 0, 0b00001111, 0b11111111},
+			},
+			want: &Word{
+				data: []byte{0, 0b11111111, 0b11110000, 0, 0},
+			},
 		},
 		{
-			w: &Word{
-				data: []byte{0b10000000, 0, 0b10111100, 0b01100001, 0b01001110},
+			addr: 2025,
+			oriW: &Word{
+				data: []byte{0b00111001, 0b00101111, 0b01100111, 0b00001111, 0b11010011},
 			},
-			wantInt: -12345678,
+			MBR: &Word{
+				data: []byte{0b01101001, 0b01101010, 0b11010110, 0b10101010, 0b00101110},
+			},
+			want: &Word{
+				data: []byte{0b00111001, 0b10100010, 0b11100111, 0b00001111, 0b11010011},
+			},
 		},
 	}
 
 	for i, tt := range test {
 		t.Run(fmt.Sprintf("test %d", i), func(t *testing.T) {
-			// to int64
-			gotInt := tt.w.ToInt64()
-			assert.Equal(t, gotInt, tt.wantInt)
-			// from int64
-			gotw := NewWordFromInt64(tt.wantInt)
-			assert.Equal(t, gotw, tt.w)
+			memory.DirectWrite(tt.addr, tt.oriW)
+			MAR.SetAddr(tt.addr)
+			MBR.SetWord(tt.MBR)
+			memory.WriteLeftAddr()
+			got := memory.DirectRead(tt.addr)
+			assert.Equal(t, got, tt.want)
+		})
+	}
+}
+
+func TestMemoryWriteRightAddr(t *testing.T) {
+	test := []struct {
+		addr int
+		oriW *Word
+		MBR  *Word
+		want *Word
+	}{
+		{
+			addr: 25,
+			oriW: &Word{
+				data: []byte{0, 0, 0, 0, 0},
+			},
+			MBR: &Word{
+				data: []byte{0, 0, 0, 0b00001111, 0b11111111},
+			},
+			want: &Word{
+				[]byte{0, 0, 0, 0b00001111, 0b11111111},
+			},
+		},
+		{
+			addr: 2025,
+			oriW: &Word{
+				data: []byte{0b00111001, 0b00101111, 0b01100111, 0b00001111, 0b11010011},
+			},
+			MBR: &Word{
+				data: []byte{0b01101001, 0b01101010, 0b11010110, 0b10101010, 0b00101110},
+			},
+			want: &Word{
+				data: []byte{0b00111001, 0b00101111, 0b01100111, 0b00001010, 0b00101110},
+			},
+		},
+	}
+
+	for i, tt := range test {
+		t.Run(fmt.Sprintf("test %d", i), func(t *testing.T) {
+			memory.DirectWrite(tt.addr, tt.oriW)
+			MAR.SetAddr(tt.addr)
+			MBR.SetWord(tt.MBR)
+			memory.WriteRightAddr()
+			got := memory.DirectRead(tt.addr)
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
