@@ -180,11 +180,11 @@ func TestMemoryWriteLeftAddr(t *testing.T) {
 
 	for i, tt := range test {
 		t.Run(fmt.Sprintf("test %d", i), func(t *testing.T) {
-			memory.DirectWrite(tt.addr, tt.oriW)
+			DirectWrite(tt.addr, tt.oriW)
 			MAR.SetAddr(tt.addr)
 			MBR.SetWord(tt.MBR)
 			memory.WriteLeftAddr()
-			got := memory.DirectRead(tt.addr)
+			got := DirectRead(tt.addr)
 			assert.Equal(t, got, tt.want)
 		})
 	}
@@ -225,11 +225,11 @@ func TestMemoryWriteRightAddr(t *testing.T) {
 
 	for i, tt := range test {
 		t.Run(fmt.Sprintf("test %d", i), func(t *testing.T) {
-			memory.DirectWrite(tt.addr, tt.oriW)
+			DirectWrite(tt.addr, tt.oriW)
 			MAR.SetAddr(tt.addr)
 			MBR.SetWord(tt.MBR)
 			memory.WriteRightAddr()
-			got := memory.DirectRead(tt.addr)
+			got := DirectRead(tt.addr)
 			assert.Equal(t, got, tt.want)
 		})
 	}

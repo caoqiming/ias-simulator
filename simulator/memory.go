@@ -71,19 +71,19 @@ func (m *Memory) WriteRightAddr() {
 }
 
 // 直接读取内存，只应该用于测试或初始化
-func (m *Memory) DirectRead(addr int) *Word {
+func DirectRead(addr int) *Word {
 	if addr < 0 || addr >= 4096 {
 		panic(fmt.Sprintf("invalid addr %v", addr))
 	}
-	return m.words[addr].DeepCopy()
+	return memory.words[addr].DeepCopy()
 }
 
 // 直接写入内存，只应该用于测试或初始化
-func (m *Memory) DirectWrite(addr int, w *Word) {
+func DirectWrite(addr int, w *Word) {
 	if addr < 0 || addr >= 4096 {
 		panic(fmt.Sprintf("invalid addr %v", addr))
 	}
-	m.words[addr] = *w.DeepCopy()
+	memory.words[addr] = *w.DeepCopy()
 }
 
 func initMemory() {

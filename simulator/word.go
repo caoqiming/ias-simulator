@@ -1,6 +1,7 @@
 package simulator
 
 import (
+	"fmt"
 	"math/big"
 )
 
@@ -155,4 +156,13 @@ func (w *Word) LSH() *Word {
 func (w *Word) RSH() *Word {
 	x := w.ToInt64() >> 1
 	return NewWordFromInt64(x)
+}
+
+// Right shift one bit
+func (w *Word) ToHexStr() string {
+	var r string
+	for _, b := range w.data {
+		r = fmt.Sprintf("%s%02X", r, b)
+	}
+	return r
 }

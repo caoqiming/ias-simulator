@@ -122,7 +122,9 @@ func (r *InstructionRegister) Write(code byte) {
 }
 
 func NewInstructionRegister() *InstructionRegister {
-	return &InstructionRegister{}
+	return &InstructionRegister{
+		code: 0b00000000,
+	}
 }
 
 func initRegister() {

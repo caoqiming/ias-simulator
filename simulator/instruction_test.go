@@ -30,14 +30,14 @@ func TestInstructionStoreM(t *testing.T) {
 	AC.SetWord(&Word{data: []byte{0b11111111, 0, 0, 0, 0}})
 	instruction.Run()
 	assert.Equal(t, MBR.data.data[0], byte(0b11111111))
-	assert.Equal(t, memory.DirectRead(1024).data[0], byte(0b11111111))
+	assert.Equal(t, DirectRead(1024).data[0], byte(0b11111111))
 }
 
 func TestInstructionLoadM(t *testing.T) {
 	instruction := &InstructionLoadM{}
 	MAR.SetAddr(2025)
 	AC.SetWord(&Word{data: []byte{0b11111111, 0, 0, 0, 0}})
-	memory.DirectWrite(2025, &Word{data: []byte{0b01101001, 0, 0, 0, 0}})
+	DirectWrite(2025, &Word{data: []byte{0b01101001, 0, 0, 0, 0}})
 	instruction.Run()
 	assert.Equal(t, MBR.data.data[0], byte(0b01101001))
 	assert.Equal(t, AC.data.data[0], byte(0b01101001))

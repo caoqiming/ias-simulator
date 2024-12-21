@@ -37,9 +37,9 @@ const (
 	// Add |M(X)| to AC, put the result in AC
 	OpcodeAddAbsM = 0b00000111
 	// Substract M(X) from AC, put the resul in AC
-	OpcodeSubstractM = 0b00000110
+	OpcodeSubM = 0b00000110
 	// Substract |M(X)| from AC, put the resul in AC
-	OpcodeSubstractAbsM = 0b00001000
+	OpcodeSubAbsM = 0b00001000
 	// Multiply M(X) by MQ, put most significant bits of result in AC, put least significant bits in MQ
 	OpcodeMultiplyM = 0b00001011
 	// Divide AC by M(X), put the quotient in MQ and the remainder in AC
@@ -74,9 +74,33 @@ func (is *InstructionSet) GetInstruction(code byte) (InstructionInterface, error
 }
 
 func InitInstructionSet() {
+	instructionSet.instructions = make(map[byte]InstructionInterface)
 	instructionSet.regist(OpcodeLoadMQ, &InstructionLoadMQ{})
 	instructionSet.regist(OpcodeLoadMToMQ, &InstructionLoadMToMQ{})
 	instructionSet.regist(OpcodeStoreM, &InstructionStoreM{})
+	instructionSet.regist(OpcodeLoadM, &InstructionLoadM{})
+	instructionSet.regist(OpcodeLoadNegativeM, &InstructionLoadNegativeM{})
+	instructionSet.regist(OpcodeLoadAbsM, &InstructionLoadAbsM{})
+	instructionSet.regist(OpcodeLoadNegativeAbsM, &InstructionLoadNegativeAbsM{})
+
+	instructionSet.regist(OpcodeJumpMLeft, &InstructionJumpMLeft{})
+	instructionSet.regist(OpcodeJumpMRight, &InstructionJumpMRight{})
+
+	instructionSet.regist(OpcodeConditionalJumpMLeft, &InstructionConditionalJumpMLeft{})
+	instructionSet.regist(OpcodeConditionalJumpMRight, &InstructionConditionalJumpMRight{})
+
+	instructionSet.regist(OpcodeAddM, &InstructionAddM{})
+	instructionSet.regist(OpcodeAddAbsM, &InstructionAddAbsM{})
+	instructionSet.regist(OpcodeSubM, &InstructionSubM{})
+	instructionSet.regist(OpcodeSubAbsM, &InstructionSubAbsM{})
+	instructionSet.regist(OpcodeMultiplyM, &InstructionMultiplyM{})
+	instructionSet.regist(OpcodeDivideM, &InstructionDivideM{})
+	instructionSet.regist(OpcodeLSH, &InstructionLSH{})
+	instructionSet.regist(OpcodeRSH, &InstructionRSH{})
+
+	instructionSet.regist(OpcodeStoreMLeftAddr, &InstructionStoreMLeftAddr{})
+	instructionSet.regist(OpcodeStoreMRightAddr, &InstructionStoreMRightAddr{})
+
 }
 
 type InstructionInterface interface {
@@ -216,7 +240,7 @@ type InstructionMultiplyM struct{}
 
 func (instruction *InstructionMultiplyM) Run() {
 	memory.Read()
-	higherWord, lowerWord := AC.GetWord().Mul(MBR.GetWord())
+	higherWord, lowerWord := MQ.GetWord().Mul(MBR.GetWord())
 	AC.SetWord(higherWord)
 	MQ.SetWord(lowerWord)
 }
