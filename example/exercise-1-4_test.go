@@ -44,7 +44,7 @@ func TestExecrise1_4(t *testing.T) {
 				s.DirectWrite(250, s.NewWordFromInt64(tt.ori))
 				s.SetInstructions(myProgram, 138)
 				s.PC.SetAddr(138)
-				err := s.ExecuteWithMaxSteps(s.WithMaxSteps(6), s.WithProgramExitAddr(141))
+				err := s.ExecuteWithMaxSteps(s.WithMaxSteps(6), s.WithHaultAt(141))
 				if err != nil {
 					s.PrintStatus()
 				}

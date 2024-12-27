@@ -90,22 +90,22 @@ func WithMaxSteps(maxSteps int) SimulateOption {
 }
 
 // 程序执行到该地址就结束（该地址的指令不会被执行）
-func WithProgramExitAddr(programExitAddr int) SimulateOption {
+func WithHaultAt(haultAt int) SimulateOption {
 	return func(param *ExecuteParam) {
-		param.programExitAddr = programExitAddr
+		param.haultAt = haultAt
 	}
 }
 
 type ExecuteParam struct {
-	maxSteps        int
-	programExitAddr int
+	maxSteps int
+	haultAt  int
 }
 
 // 连续执行，直到达到最大执行次数或遇到报错
 func ExecuteWithMaxSteps(options ...SimulateOption) error {
 	param := &ExecuteParam{
-		maxSteps:        10000,
-		programExitAddr: -1,
+		maxSteps: DefaultMaxSteps,
+		haultAt:  DefaultHaultAt,
 	}
 	for _, option := range options {
 		option(param)
@@ -116,7 +116,7 @@ func ExecuteWithMaxSteps(options ...SimulateOption) error {
 		if err := ExecuteOneInstruction(); err != nil {
 			return fmt.Errorf("fail when execute step %d (start from 0), err: %v", i, err)
 		}
-		if PC.GetAddr() == param.programExitAddr {
+		if PC.GetAddr() == param.haultAt {
 			break
 		}
 	}
