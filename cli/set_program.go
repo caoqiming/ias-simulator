@@ -15,12 +15,16 @@ const (
 	ProgramCounterStartAtTips = `The program will start running from this address, that is, this is the initial value of PC.`
 	MaxStepsTips              = `The program will stop after executing this number of instructions.`
 	HaultAtTips               = `The program will stop when it reaches this address, and the instructions at this address will not be executed.`
+	MemorySettingsTips        = `Specify the memory to be initialized here. 
+	Because programs and data are stored in memory, you can actually write programs here, which is equivalent to writing programs on it. 
+	You can specify multiple non-contiguous memory addresses to write here. Please follow the yaml format, please refer to README for details.`
 )
 
 // This page is used to write the program into memory,
 // set the location to start running, and some settings during running.
 func (s *SimulatorCli) initSetProgramPage() {
 	s.setProgramPage.Clear(true)
+	// program
 	s.setProgramPage.AddTextView("", SetProgramTips, 0, 1, true, false)
 	s.setProgramPage.AddTextArea("program", strings.Join(s.program.ProgramInHexFormat, "\n"), 0, 10, 0, func(text string) {
 		programInHexFormat, err := splitAndValidateProgram(text)
@@ -29,8 +33,10 @@ func (s *SimulatorCli) initSetProgramPage() {
 			return
 		}
 		s.program.ProgramInHexFormat = programInHexFormat
+		s.appendToConsole("program set successfully")
 	})
 
+	// where program will be written to
 	s.setProgramPage.AddTextView("", ProgramAddrTips, 0, 1, true, false)
 	s.setProgramPage.AddInputField("program addr", fmt.Sprintf("%d", s.program.ProgramAddr), 4, nil, func(text string) {
 		if text == "" {
@@ -43,6 +49,7 @@ func (s *SimulatorCli) initSetProgramPage() {
 		s.program.ProgramAddr = result
 	})
 
+	// where program start
 	s.setProgramPage.AddTextView("", ProgramCounterStartAtTips, 0, 1, true, false)
 	s.setProgramPage.AddInputField("start at", fmt.Sprintf("%d", s.program.ProgramCounterStartAt), 4, nil, func(text string) {
 		if text == "" {
@@ -55,6 +62,7 @@ func (s *SimulatorCli) initSetProgramPage() {
 		s.program.ProgramCounterStartAt = result
 	})
 
+	// max steps
 	s.setProgramPage.AddTextView("", MaxStepsTips, 0, 1, true, false)
 	s.setProgramPage.AddInputField("max steps", fmt.Sprintf("%d", s.program.MaxSteps), 10, nil, func(text string) {
 		if text == "" {
@@ -67,6 +75,7 @@ func (s *SimulatorCli) initSetProgramPage() {
 		s.program.MaxSteps = result
 	})
 
+	// hault at
 	s.setProgramPage.AddTextView("", HaultAtTips, 0, 1, true, false)
 	s.setProgramPage.AddInputField("hault at", fmt.Sprintf("%d", s.program.HaltAt), 4, nil, func(text string) {
 		if text == "" {
@@ -79,6 +88,24 @@ func (s *SimulatorCli) initSetProgramPage() {
 		s.program.HaltAt = result
 	})
 
+	// memory init
+	s.setProgramPage.AddTextView("", MemorySettingsTips, 0, 1, true, false)
+	var memorySettingsStr string
+	memorySettingsBytes, err := yaml.Marshal(s.program.MemorySettings)
+	if err == nil {
+		memorySettingsStr = string(memorySettingsBytes)
+	} else {
+		s.appendToConsole(fmt.Sprintf("fial to unmarshal memory settings from file, err: %s", err.Error()))
+	}
+	s.setProgramPage.AddTextArea("memory settings", memorySettingsStr, 0, 10, 0, func(text string) {
+		if err := yaml.Unmarshal([]byte(text), &s.program.MemorySettings); err != nil {
+			s.appendToConsole(fmt.Sprintf("fail to parse memory settings, error: %s", err.Error()))
+		} else {
+			s.appendToConsole("Memory data set successfully")
+		}
+	})
+
+	// load/save
 	s.setProgramPage.AddInputField("load from/save to", s.program.ProgramPath, 0, nil, func(text string) {
 		s.program.ProgramPath = text
 	})
