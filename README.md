@@ -19,4 +19,6 @@ This idea is attributed to the mathematician John Von Neumann, and the first pub
 1. Prepare your golang environment.
 2. `go install github.com/caoqiming/ias-simulator/cmd/ias-simulator@latest`
 
-###
+### run
+
+run `ias-simulator`
