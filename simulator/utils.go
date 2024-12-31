@@ -24,6 +24,15 @@ func PrintStatus() {
 	fmt.Println("=============================")
 }
 
+// 返回各个寄存器的数据
+func SPrintStatus() string {
+	var result string
+	result += fmt.Sprintf("PC:  %10d  IR: %10d\n", PC.GetAddr(), IR.Read())
+	result += fmt.Sprintf("MAR: %10d MBR: %10d\n", MAR.GetAddr(), MBR.GetWord().ToInt64())
+	result += fmt.Sprintf("AC:  %10d  MQ: %10d\n", AC.GetWord().ToInt64(), MQ.GetWord().ToInt64())
+	return result
+}
+
 // 将程序转化为16进制的格式
 func ConvertInstructionAndAddrListToHexStrList(data []*InstructionAndAddr) []string {
 	result := []string{}

@@ -14,7 +14,7 @@ func TestExecrise1_1_a(t *testing.T) {
 	// 不妨假设数字N输入在地址 100，我们将结果输出到地址101
 	// 这里直接用公式 N*（N+1）/2
 	// 初始化
-	// 将 1 写到 102，将 2 写到 103
+	// 将 1 写到 102
 	myProgram := []*s.InstructionAndAddr{
 		{s.OpcodeLoadM, 100},     // N -> AC
 		{s.OpcodeAddM, 102},      // AC = AC + 1
@@ -22,9 +22,8 @@ func TestExecrise1_1_a(t *testing.T) {
 		{s.OpcodeLoadMToMQ, 102}, // 读 N+1 到 MQ
 		{s.OpcodeMultiplyM, 100}, // MQ * N
 		{s.OpcodeLoadMQ, 0},      // MQ -> AC
-		{s.OpcodeDivideM, 103},   // AC = AC / 2
-		{s.OpcodeLoadMQ, 0},      // MQ -> AC
-		{s.OpcodeStoreM, 101},    // MQ -> AC
+		{s.OpcodeRSH, 0},         // AC = AC / 2
+		{s.OpcodeStoreM, 101},
 	}
 	test := []struct {
 		ori  int64
@@ -49,11 +48,10 @@ func TestExecrise1_1_a(t *testing.T) {
 			func(t *testing.T) {
 				s.Init()
 				s.DirectWrite(102, s.NewWordFromInt64(1))
-				s.DirectWrite(103, s.NewWordFromInt64(2))
 				s.DirectWrite(100, s.NewWordFromInt64(tt.ori))
 				s.SetInstructions(myProgram, 0)
 				s.PC.SetAddr(0)
-				err := s.ExecuteWithMaxSteps(s.WithMaxSteps(len(myProgram)))
+				err := s.Execute(s.WithMaxSteps(len(myProgram)))
 				if err != nil {
 					s.PrintStatus()
 				}
@@ -114,7 +112,7 @@ func TestExecrise1_1_b(t *testing.T) {
 				s.DirectWrite(100, s.NewWordFromInt64(tt.ori))
 				s.SetInstructions(myProgram, 0)
 				s.PC.SetAddr(0)
-				err := s.ExecuteWithMaxSteps(s.WithHaultAt(5))
+				err := s.Execute(s.WithHaultAt(5))
 				if err != nil {
 					s.PrintStatus()
 				}

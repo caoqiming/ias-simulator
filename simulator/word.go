@@ -1,6 +1,7 @@
 package simulator
 
 import (
+	"encoding/hex"
 	"fmt"
 	"math/big"
 )
@@ -14,6 +15,21 @@ func NewWord() *Word {
 	return &Word{
 		data: make([]byte, 5),
 	}
+}
+
+func NewWordFromHexStr(data string) (*Word, error) {
+	// 尝试将字符串转换为十六进制字节切片
+	bytes, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, err
+	}
+	if len(bytes) != 5 {
+		return nil, fmt.Errorf("fail to convert string to word, data length is not 5 bytes")
+	}
+
+	return &Word{
+		data: bytes,
+	}, nil
 }
 
 func (w *Word) DeepCopy() *Word {

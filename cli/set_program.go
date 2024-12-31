@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/caoqiming/ias-simulator/simulator"
 	"gopkg.in/yaml.v3"
 )
 
@@ -105,17 +106,18 @@ func (s *SimulatorCli) initSetProgramPage() {
 		}
 	})
 
-	// load/save
+	// load/apply/save
 	s.setProgramPage.AddInputField("load from/save to", s.program.ProgramPath, 0, nil, func(text string) {
 		s.program.ProgramPath = text
 	})
 	s.setProgramPage.AddButton("load", s.loadPorgramFromPath)
+	s.setProgramPage.AddButton("apply", s.applyProgramSettingsToSimulator)
 	s.setProgramPage.AddButton("save", s.savePorgramToPath)
 }
 
 func (s *SimulatorCli) navigateToSetProgramPage() {
-	s.grid.RemoveItem(s.userGuidePage)
-	s.grid.AddItem(s.setProgramPage, 0, 1, 1, 1, 0, 0, false)
+	s.ClearMainGrid()
+	s.mainGrid.AddItem(s.setProgramPage, 0, 1, 1, 1, 0, 0, false)
 }
 
 func (s *SimulatorCli) loadPorgramFromPath() {
@@ -133,7 +135,6 @@ func (s *SimulatorCli) loadPorgramFromPath() {
 
 	// 刷新
 	s.initSetProgramPage()
-	// s.navigateToSetProgramPage()
 }
 
 func (s *SimulatorCli) savePorgramToPath() {
@@ -148,4 +149,30 @@ func (s *SimulatorCli) savePorgramToPath() {
 		s.appendToConsole(err.Error())
 		return
 	}
+}
+
+func (s *SimulatorCli) applyProgramSettingsToSimulator() {
+	s.appendToConsole("apply program settings to simulator")
+	// 清理当前的状态
+	simulator.Init()
+	// 写入程序
+	for i, data := range s.program.ProgramInHexFormat {
+		w, err := simulator.NewWordFromHexStr(data)
+		if err != nil {
+			s.appendToConsole(err.Error())
+		}
+		simulator.DirectWrite(s.program.ProgramAddr+i, w)
+	}
+	// 写入内存初始化
+	for _, memorySetting := range s.program.MemorySettings {
+		for i, data := range memorySetting.Content {
+			w, err := simulator.NewWordFromHexStr(data)
+			if err != nil {
+				s.appendToConsole(err.Error())
+			}
+			simulator.DirectWrite(memorySetting.Addr+i, w)
+		}
+	}
+	// set PC
+	simulator.PC.SetAddr(s.program.ProgramCounterStartAt)
 }

@@ -102,7 +102,7 @@ type ExecuteParam struct {
 }
 
 // 连续执行，直到达到最大执行次数或遇到报错
-func ExecuteWithMaxSteps(options ...SimulateOption) error {
+func Execute(options ...SimulateOption) error {
 	param := &ExecuteParam{
 		maxSteps: DefaultMaxSteps,
 		haultAt:  DefaultHaultAt,

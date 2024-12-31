@@ -1,7 +1,7 @@
 package cli
 
 type ProgramConfig struct {
-	ProgramPath           string          `yaml:"programPath"`
+	ProgramPath           string          `yaml:"-"`
 	ProgramInHexFormat    []string        `yaml:"programInHexFormat"`
 	ProgramAddr           int             `yaml:"programAddr"`           // 程序从内存的这个地址开始写入
 	ProgramCounterStartAt int             `yaml:"programCounterStartAt"` // 程序从内存的这个地址开始运行

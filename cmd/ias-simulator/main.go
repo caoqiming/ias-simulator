@@ -7,5 +7,6 @@ import (
 
 func main() {
 	simulator.Init()
+	cli.Init()
 	cli.SimulatorCliSingleton.Run()
 }

@@ -1,0 +1,19 @@
+# This example is a program for summing an arithmetic sequence.
+# Write n to address 100, write 1 to address 102, and then run the program.
+# The result of summing the arithmetic sequence from 1 to n will be written to address 101.
+programInHexFormat:
+  - "0106405066"
+  - "2106609066"
+  - 0B0640A000
+  - "1500021065"
+programAddr: 0
+programCounterStartAt: 0
+maxSteps: 8
+haltAt: -1
+memorySettings:
+  - addr: 100
+    content:
+      - "0000000064"
+  - addr: 102
+    content:
+      - "0000000001"
